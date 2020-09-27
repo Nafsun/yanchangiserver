@@ -159,6 +159,7 @@ const typeDefs = gql`
         dateofmembership: String
     }
     type Err {
+        newaccountnumber: String
         error: String
         balance: String
     }
@@ -264,6 +265,8 @@ const typeDefs = gql`
         expenses(username: String, amount: String, description: String, bankname: String, bankaccountnumber: String, bankaccountname: String, jwtauth: String): Err
         expensesupdate(id: String, username: String, amount: String, description: String, bankname: String, bankaccountnumber: String, bankaccountname: String, jwtauth: String): Err
         expensesdelete(id: String, username: String, jwtauth: String): Err
+
+        generateaccountnumber(username: String, jwtauth: String): Err
     }
 `;
 

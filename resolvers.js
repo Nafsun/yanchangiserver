@@ -1976,6 +1976,45 @@ const resolvers = {
             }
         },
 
+        generateaccountnumber: async (_, { username, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    let allexistingaccountnumber = [];
+                    let newaccountnumber = 0;
+
+                    username = await UsersVerification(username);
+
+                    let gan = await buyandsell.find({ username });
+
+                    await gan.forEach((e) => {
+                        allexistingaccountnumber.push(e.supplieraccountno);
+                        allexistingaccountnumber.push(e.customeraccountno);
+                    });
+
+                    for(let a = 0; a <= 100000; a++){
+                        newaccountnumber = Math.random().toString().slice(2,8);
+                        if(allexistingaccountnumber.includes(newaccountnumber.toString()) === false){
+                            break;
+                        }
+                    }
+
+                    return { newaccountnumber: newaccountnumber };
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
     }
 }
 
