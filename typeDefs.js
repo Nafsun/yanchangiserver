@@ -126,6 +126,7 @@ const typeDefs = gql`
         bankaccountnumber: String
         bankaccountname: String
         bankamount: String
+        bankbalance: String
         date: String
     }
     type BUYANDSELL{

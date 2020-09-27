@@ -641,7 +641,7 @@ const resolvers = {
 
                         total = parseFloat(banklist[count].bankbalance) + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - expensecount;
 
-                        allbanks.push({...banklist[count], bankamount: total});
+                        allbanks.push({...banklist[count], bankamount: total, bankbalance: banklist[count].bankbalance});
 
                         supplierrecievercount = 0;
                         customerrecievercount = 0;
