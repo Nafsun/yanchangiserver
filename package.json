@@ -1,0 +1,37 @@
+{
+  "name": "posshops",
+  "version": "1.0.0",
+  "description": "posshops is a online record keeping system for POS shop owners",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Muhammad Aliyu",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server-express": "^2.10.0",
+    "argon2": "^0.26.2",
+    "bcrypt": "^4.0.1",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "date-fns": "^2.14.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-mongo-sanitize": "^2.0.0",
+    "helmet": "^3.22.0",
+    "hsts": "^2.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.31",
+    "mongoose": "^5.9.13",
+    "node-pre-gyp": "^0.15.0",
+    "nodemailer": "^6.4.10",
+    "socket.io": "^2.3.0",
+    "web-push": "^3.4.4",
+    "x-xss-protection": "^2.0.0",
+    "xss-filters": "^1.2.7"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
