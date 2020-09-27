@@ -639,8 +639,6 @@ const resolvers = {
                             }
                         });
 
-                        console.log(expensecount)
-
                         total = parseFloat(banklist[count].bankbalance) + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - expensecount;
 
                         allbanks.push({...banklist[count], bankamount: total});
