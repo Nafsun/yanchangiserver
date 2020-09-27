@@ -826,6 +826,11 @@ const resolvers = {
                     let totalexpense = 0;
                     let totalopeningbalancesupplier = 0;
                     let totalopeningbalancecustomer = 0;
+                    let totalprofitbalance = 0;
+
+                    await tbuyandsell.forEach((e) => {
+                        totalprofitbalance += parseFloat(e.profit);
+                    });
 
                     await tbanks.forEach((e) => {
                         total += parseFloat(e.bankamount);
@@ -855,7 +860,7 @@ const resolvers = {
                         }
                     });
 
-                    totalbalance = total + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - totalexpense - totalopeningbalancesupplier - totalopeningbalancecustomer;
+                    totalbalance = totalprofitbalance + total + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - totalexpense - totalopeningbalancesupplier - totalopeningbalancecustomer;
 
                     //Total Debt - Supplier
                     let totaldebt = 0;
