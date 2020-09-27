@@ -41,6 +41,9 @@ const typeDefs = gql`
         id: String
         description: String
         amount: String
+        bankname: String
+        bankaccountnumber: String
+        bankaccountname: String
         date: String
         totalamount: String
     }
@@ -81,6 +84,8 @@ const typeDefs = gql`
         totaloverdraft: String 
         net: String 
         totalprofit: String
+        totalexpense: String
+        netprofit: String
     }
     type TOTALCUSTOMERANDSUPPLIER{
         totalbalance: String
@@ -250,13 +255,14 @@ const typeDefs = gql`
         addnewuser(username: String, newusername: String, newpassword: String, createbank: String, editbank: String, deletebank: String, createtransaction: String, edittransaction: String, deletetransaction: String, createrecieveorpay: String, editrecieveorpay: String, deleterecieveorpay: String, createexpense: String, editexpense: String, deleteexpense: String, createopeningbalance: String, editopeningbalance: String, deleteopeningbalance: String, jwtauth: String): Err
         existingusersdelete(id: String, username: String, jwtauth: String): Err
         existingusersupdate(id: String, username: String, newusername: String, newpassword: String, createbank: String, editbank: String, deletebank: String, createtransaction: String, edittransaction: String, deletetransaction: String, createrecieveorpay: String, editrecieveorpay: String, deleterecieveorpay: String, createexpense: String, editexpense: String, deleteexpense: String, createopeningbalance: String, editopeningbalance: String, deleteopeningbalance: String, jwtauth: String): Err
-        expenses(username: String, amount: String, description: String, jwtauth: String): Err
-        editexpenses(id: String, username: String, amount: String, description: String, jwtauth: String): Err
-        deleteexpenses(id: String, username: String, jwtauth: String): Err
 
         openingbalanceinsert(username: String, amount: String, chooseclient: String, name: String, accountnumber: String, jwtauth: String): Err
         openingbalanceupdate(id: String, username: String, amount: String, chooseclient: String, name: String, accountnumber: String, jwtauth: String): Err
         openingbalancedelete(id: String, username: String, jwtauth: String): Err
+
+        expenses(username: String, amount: String, description: String, bankname: String, bankaccountnumber: String, bankaccountname: String, jwtauth: String): Err
+        expensesupdate(id: String, username: String, amount: String, description: String, bankname: String, bankaccountnumber: String, bankaccountname: String, jwtauth: String): Err
+        expensesdelete(id: String, username: String, jwtauth: String): Err
     }
 `;
 

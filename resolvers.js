@@ -593,10 +593,12 @@ const resolvers = {
                     let customerrecievercount = 0;
                     let supplierpayercount = 0;
                     let customerpayercount = 0;
+                    let expensecount = 0;
                     let total = 0;
 
                     const banker = await banks.find({ username: username });
                     const recieverorpayer = await recieveorpay.find({ username: username });
+                    const expenses = await expense.find({ username });
                     
                     await banker.forEach((e) => {
                         banklist.push({id: e.id, bankname: e.bankname, bankaccountnumber: e.bankaccountnumber, bankaccountname: e.bankaccountname, bankbalance: e.bankamount});
@@ -629,9 +631,17 @@ const resolvers = {
                             }
                         });
 
-                        total = parseFloat(banklist[count].bankbalance) + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount;
+                        expenses.forEach((a) => {
+                            if(a.bankname === banklist[count].bankname &&
+                                a.bankaccountnumber === banklist[count].bankaccountnumber &&
+                                a.bankaccountname === banklist[count].bankaccountname){
+                                    expensecount += parseFloat(a.amount);
+                            }
+                        });
 
-                        //console.log(parseFloat(banklist[count].bankbalance), supplierrecievercount, customerrecievercount, supplierpayercount, customerpayercount)
+                        console.log(expensecount)
+
+                        total = parseFloat(banklist[count].bankbalance) + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - expensecount;
 
                         allbanks.push({...banklist[count], bankamount: total});
 
@@ -639,11 +649,10 @@ const resolvers = {
                         customerrecievercount = 0;
                         supplierpayercount = 0;
                         customerpayercount = 0;
+                        expensecount = 0;
                         total = 0;
                         count += 1;
                     });
-
-                    //console.log(allbanks);
 
                     return allbanks.reverse();
 
@@ -910,7 +919,11 @@ const resolvers = {
                         totalprofit += parseFloat(e.profit);
                     });
 
-                    return {totalbalance: totalbalance, totaldebt: totaldebt, totaloverdraft: totaloverdraft, net: net, totalprofit: totalprofit};
+                    let netprofit = 0;
+
+                    netprofit = totalprofit - totalexpense;
+
+                    return {totalbalance: totalbalance, totaldebt: totaldebt, totaloverdraft: totaloverdraft, net: net, totalprofit: totalprofit, totalexpense: totalexpense, netprofit: netprofit};
 
                 } catch (e) {
                     return { error: "yes" };
@@ -1820,80 +1833,6 @@ const resolvers = {
             }
         },
 
-        expenses: async (_, { username, amount, description, jwtauth }) => {
-            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
-
-            if (tokenverification.username !== username) {
-                return { error: "changetoken" };
-            }
-
-            if (tokenverification) {
-                try {
-
-                    username = await UsersVerification(username);
-
-                    const expenser = new expense({ username, amount, description });
-
-                    await expenser.save();
-
-                    return { error: "no" };
-
-                } catch (e) {
-                    return { error: "yes" };
-                }
-            } else {
-                return { error: "errortoken" };
-            }
-        },
-
-        editexpenses: async (_, { id, username, amount, description, jwtauth }) => {
-            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
-
-            if (tokenverification.username !== username) {
-                return { error: "changetoken" };
-            }
-
-            if (tokenverification) {
-                try {
-
-                    username = await UsersVerification(username);
-
-                    await expense.updateOne({_id: id, username: username }, {$set: { amount, description }});
-
-                    return { error: "no" };
-
-                } catch (e) {
-                    return { error: "yes" };
-                }
-            } else {
-                return { error: "errortoken" };
-            }
-        },
-
-        deleteexpenses: async (_, { id, username, jwtauth }) => {
-            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
-
-            if (tokenverification.username !== username) {
-                return { error: "changetoken" };
-            }
-
-            if (tokenverification) {
-                try {
-
-                    username = await UsersVerification(username);
-
-                    await expense.deleteOne({_id: id, username: username });
-
-                    return { error: "no" };
-
-                } catch (e) {
-                    return { error: "yes" };
-                }
-            } else {
-                return { error: "errortoken" };
-            }
-        },
-
         openingbalanceinsert: async (_, { username, amount, chooseclient, name, accountnumber, jwtauth }) => {
             const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
 
@@ -1955,6 +1894,79 @@ const resolvers = {
                     username = await UsersVerification(username);
 
                     await openingbalance.updateOne({ _id: id, username: username }, { $set: { amount, chooseclient, name, accountnumber } });
+
+                    return { error: "no" };
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        expenses: async (_, { username, amount, description, bankname, bankaccountnumber, bankaccountname, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    const expenser = new expense({ username, amount, description, bankname, bankaccountnumber, bankaccountname });
+
+                    await expenser.save();
+
+                    return { error: "no" };
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        expensesdelete: async (_, { id, username, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    await expense.deleteOne({ _id: id, username: username });
+
+                    return { error: "no" };
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        expensesupdate: async (_, { id, username, amount, description, bankname, bankaccountnumber, bankaccountname, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    await expense.updateOne({ _id: id, username: username }, { $set: { amount, description, bankname, bankaccountnumber, bankaccountname } });
 
                     return { error: "no" };
 

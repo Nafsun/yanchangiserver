@@ -7,6 +7,9 @@ let expense = mongoose.model("expense",
         username: String,
         amount: String,
         description: String,
+        bankname: String,
+        bankaccountnumber: String,
+        bankaccountname: String,
         date: {type:String, default: () => moment().utcOffset(1).format('LLLL')}
 
     }, {timestamps: true}));
