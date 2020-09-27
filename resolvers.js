@@ -601,7 +601,7 @@ const resolvers = {
                     const expenses = await expense.find({ username });
                     
                     await banker.forEach((e) => {
-                        banklist.push({id: e.id, bankname: e.bankname, bankaccountnumber: e.bankaccountnumber, bankaccountname: e.bankaccountname, bankbalance: e.bankamount});
+                        banklist.push({id: e._id, bankname: e.bankname, bankaccountnumber: e.bankaccountnumber, bankaccountname: e.bankaccountname, bankbalance: e.bankamount, date: e.date});
                     });
 
                     //console.log(banklist);
@@ -641,7 +641,7 @@ const resolvers = {
 
                         total = parseFloat(banklist[count].bankbalance) + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - expensecount;
 
-                        allbanks.push({...banklist[count], bankamount: total, bankbalance: banklist[count].bankbalance});
+                        allbanks.push({...banklist[count], bankamount: total, bankbalance: banklist[count].bankbalance, date: e.date});
 
                         supplierrecievercount = 0;
                         customerrecievercount = 0;
