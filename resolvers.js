@@ -2,7 +2,6 @@ const signup = require("./models/signup");
 const login = require("./models/login");
 const help = require("./models/help");
 const feedback = require("./models/feedback");
-const membership = require("./models/membership");
 const { sign, verify } = require("jsonwebtoken");
 var moment = require("moment");
 const argon2 = require("argon2");
@@ -13,10 +12,6 @@ const recieveorpay = require("./models/recieveorpay");
 const banks = require("./models/banks");
 const expense = require("./models/expense");
 const openingbalance = require("./models/openingbalance");
-
-function MomentDate() {
-    return moment().utcOffset(1).format('LLLL');
-}
 
 function sortByKey(array, key) {
     return array.sort(function(a, b) {
@@ -136,25 +131,7 @@ const resolvers = {
             }
 
         },
-
-        membershipchecker: async (_, { username, jwtauth }) => {
-            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
-
-            if (tokenverification.username !== username) {
-                return { error: "changetoken" };
-            }
-
-            if (tokenverification) {
-
-                const b = await signup.findOne({ username: username });
-
-                return b;
-
-            } else {
-                return { error: "errortoken" };
-            }
-        },
-
+        
         buyandsellget: async (_, { username, searchsupplier, searchcustomer, startc, endc, jwtauth }) => {
             const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
 
@@ -1416,42 +1393,6 @@ const resolvers = {
                         return { error: "hacker" };
                     }
                 }
-
-            } catch (e) {
-                return { error: "yes" };
-            }
-
-        },
-
-        membershipfund: async (_, { username, IP, amount, appfee, chargeResponseCode, currency, flwRef, fraud_status, paymentType, status, jwtauth }) => {
-
-            const tokenverification = await verify(jwtauth, process.env.Verify);
-
-            if (tokenverification.username !== username) {
-                return { error: "changetoken" };
-            }
-
-            try {
-
-                username = await UsersVerification(username);
-
-                const timeanddate = await MomentDate();
-
-                const get_new_amount = parseFloat(amount);
-
-                const gen_token = username + get_new_amount + IP + amount + appfee + chargeResponseCode + currency + flwRef + fraud_status + paymentType + status + timeanddate + process.env.Token;
-
-                const token = await argon2.hash(gen_token); //generate new token for security
-
-                const getinfo = await signup.findOne({ username: username });
-
-                const m = new membership({ username, gender: getinfo.gender, category: getinfo.category, realamount: get_new_amount, IP, amount, appfee, chargeResponseCode, currency, flwRef, fraud_status, paymentType, status, token, date: timeanddate });
-
-                await m.save();
-
-                await signup.updateOne({ username: username }, { $set: { verifymembership: "yes", dateofmembership: timeanddate } });
-
-                return { error: "no" };
 
             } catch (e) {
                 return { error: "yes" };

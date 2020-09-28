@@ -5,7 +5,6 @@ const typeDefs = gql`
         accountInfo(username: String, jwtauth: String): AccountInfo!
         emailverified(username: String, jwtauth: String): Err
 
-        membershipchecker(username: String, jwtauth: String): Member
         buyandsellget(username: String, searchsupplier: String, searchcustomer: String, startc: Int, endc: Int, jwtauth: String): [BUYANDSELL]
         totalityforcustomer(username: String, customer: String, customeraccountno: String, jwtauth: String): TOTALITY
         totalityforsupplier(username: String, supplier: String, supplieraccountno: String, jwtauth: String): TOTALITY
@@ -150,14 +149,6 @@ const typeDefs = gql`
         accountnumber: String
         date: String
     }
-    type Member{
-        firstname: String 
-        lastname: String 
-        email: String 
-        phoneno: String 
-        verifymembership: String 
-        dateofmembership: String
-    }
     type Err {
         newaccountnumber: String
         error: String
@@ -240,8 +231,6 @@ const typeDefs = gql`
         
         newpasswordverification(username: String, verificationcode: String, newpassword: String): Err
 
-        membershipfund(username: String, IP: String, amount: Float, appfee: Float, chargeResponseCode: String, currency: String, flwRef: String, fraud_status: String, paymentType: String, status: String, jwtauth: String): Err
-        
         changeemail(username: String, email: String, jwtauth: String): Err
 
         buyandsellupdate(id: String, username: String, amount1: String, rate1: String, ngn1: String, supplier: String, supplieraccountno: String, customer: String, customeraccountno: String, rate2: String, ngn2: String, profit: String, jwtauth: String): Err
