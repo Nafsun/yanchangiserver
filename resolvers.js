@@ -657,7 +657,7 @@ const resolvers = {
 
                     await bas.forEach((e) => {
                         if(e.chooseclient === "customer"){
-                            all_bas.push({id: e.id, customer: e.name, customeraccountno: e.accountnumber});
+                            all_bas.push({id: e._id, customer: e.name, customeraccountno: e.accountnumber});
                         }
                     });
 
@@ -684,20 +684,13 @@ const resolvers = {
                     username = await UsersVerification(username);
 
                     let all_gas = [];
-                    let check = 0;
 
-                    const gas = await buyandsell.find({ username: username, 'supplier': { $regex: searchsupplier, $options: "i" }, 'supplieraccountno': { $regex: searchsupplieraccountno, $options: "i" } }).hint({ $natural: -1 }).skip(start).limit(end);
+                    const gas = await openingbalance.find({ username: username, 'name': { $regex: searchsupplier, $options: "i" }, 'accountnumber': { $regex: searchsupplieraccountno, $options: "i" } }).hint({ $natural: -1 }).skip(start).limit(end);
 
                     await gas.forEach((e) => {
-                        all_gas.forEach((f) => {
-                            if(e.supplier === f.supplier && e.supplieraccountno === f.supplieraccountno){
-                                check = 1;
-                            }
-                        });
-                        if(check === 0){
-                            all_gas.push({id: e.id, supplier: e.supplier, supplieraccountno: e.supplieraccountno});
+                        if(e.chooseclient === "supplier"){
+                            all_gas.push({id: e._id, supplier: e.name, supplieraccountno: e.accountnumber});
                         }
-                        check = 0;
                     });
 
                     return all_gas;
@@ -725,7 +718,7 @@ const resolvers = {
 
                     let all_history = [];
 
-                    const history = await openingbalance.find({ username: username }).hint({ $natural: -1 }).limit(100);
+                    const history = await openingbalance.find({ username: username }).hint({ $natural: -1 });
 
                     await history.forEach((e) => {
                         all_history.push({id: e._id, type: e.chooseclient, name: e.name, accountno: e.accountnumber});
