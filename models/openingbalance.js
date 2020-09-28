@@ -9,7 +9,7 @@ let openingbalance = mongoose.model("openingbalance",
         chooseclient: String,
         name: String,
         accountnumber: String,
-        date: {type:String, default: () => moment().utcOffset(1).format('LLLL')}
+        date: {type: String, default: () => moment().utcOffset(1).format('LLLL')}
 
     }, {timestamps: true}));
 

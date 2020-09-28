@@ -652,20 +652,13 @@ const resolvers = {
                     username = await UsersVerification(username);
                     
                     let all_bas = [];
-                    let check = 0;
 
-                    const bas = await buyandsell.find({ username: username, 'customer': { $regex: searchcustomer, $options: "i" }, 'customeraccountno': { $regex: searchcustomeraccountno, $options: "i" } }).hint({ $natural: -1 }).skip(start).limit(end);
+                    const bas = await openingbalance.find({ username: username, 'name': { $regex: searchcustomer, $options: "i" }, 'accountnumber': { $regex: searchcustomeraccountno, $options: "i" } }).hint({ $natural: -1 }).skip(start).limit(end);
 
                     await bas.forEach((e) => {
-                        all_bas.forEach((f) => {
-                            if(e.customer === f.customer && e.customeraccountno === f.customeraccountno){
-                                check = 1;
-                            }
-                        });
-                        if(check === 0){
-                            all_bas.push({id: e.id, customer: e.customer, customeraccountno: e.customeraccountno});
+                        if(e.chooseclient === "customer"){
+                            all_bas.push({id: e.id, customer: e.name, customeraccountno: e.accountnumber});
                         }
-                        check = 0;
                     });
 
                     return all_bas;
@@ -731,38 +724,14 @@ const resolvers = {
                     username = await UsersVerification(username);
 
                     let all_history = [];
-                    let check = 0;
-                    let check2 = 0;
 
-                    const history = await buyandsell.find({ username: username }).hint({ $natural: -1 }).limit(100);
+                    const history = await openingbalance.find({ username: username }).hint({ $natural: -1 }).limit(100);
 
-                    //Supplier section
                     await history.forEach((e) => {
-                        all_history.forEach((f) => {
-                            if(e.supplier === f.name && e.accountno === f.supplieraccountno){
-                                check = 1;
-                            }
-                        });
-                        if(check === 0){
-                            all_history.push({id: e.id, type: "supplier", name: e.supplier, accountno: e.supplieraccountno});
-                        }
-                        check = 0;
+                        all_history.push({id: e._id, type: e.chooseclient, name: e.name, accountno: e.accountnumber});
                     });
 
-                    //Customer section
-                    await history.forEach((e) => {
-                        all_history.forEach((f) => {
-                            if(e.customer === f.name && e.customeraccountno === f.accountno){
-                                check2 = 1;
-                            }
-                        });
-                        if(check2 === 0){
-                            all_history.push({id: e.id, type: "customer", name: e.customer, accountno: e.customeraccountno});
-                        }
-                        check2 = 0;
-                    });
-
-                    return sortByKey(all_history, 'accountno').reverse();
+                    return all_history;
 
                 } catch (e) {
                     return { error: "yes" };
@@ -832,7 +801,7 @@ const resolvers = {
                         }
                     });
 
-                    totalbalance = total + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - totalexpense - totalopeningbalancesupplier - totalopeningbalancecustomer;
+                    totalbalance = total + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - totalexpense;
 
                     //Total Debt - Supplier
                     let totaldebt = 0;
@@ -1441,20 +1410,24 @@ const resolvers = {
 
                     username = await UsersVerification(username);
 
-                    //Check if a supplier account no is taken and should not be given to someone else
-                    const checksupplier = await buyandsell.findOne({ username: username, supplieraccountno: supplieraccountno });
+                    //Check if a supplier exist in opening balance
+                    const checksupplier = await openingbalance.findOne({ username: username, accountnumber: supplieraccountno });
                     if(checksupplier !== null){
-                        if(checksupplier.supplier !== supplier){
-                            return { error: "supplieraccountnotaken" }; 
+                        if(checksupplier.name !== supplier){
+                            return { error: "supplieraccountnodoesmatch" }; 
                         }
+                    }else{
+                        return { error: "accountnodontexist" };
                     }
 
-                    //Check if a customer account no is taken and should not be given to someone else
-                    const checkcustomer = await buyandsell.findOne({ username: username, customeraccountno: customeraccountno });
+                    //Check if a customer exist in opening balance
+                    const checkcustomer = await openingbalance.findOne({ username: username, accountnumber: customeraccountno });
                     if(checkcustomer !== null){
-                        if(checkcustomer.customer !== customer){
-                            return { error: "customeraccountnotaken" }; 
+                        if(checkcustomer.name !== customer){
+                            return { error: "customeraccountnodoesmatch" }; 
                         }
+                    }else{
+                        return { error: "accountnodontexist" };
                     }
 
                     await buyandsell.updateOne({ _id: id, username: username }, { $set: { amount1, rate1, ngn1, supplier, supplieraccountno, customer, customeraccountno, rate2, ngn2, profit } });
@@ -1503,20 +1476,24 @@ const resolvers = {
 
                     username = await UsersVerification(username);
 
-                    //Check if a supplier account no is taken and should not be given to someone else
-                    const checksupplier = await buyandsell.findOne({ username: username, supplieraccountno: supplieraccountno });
+                    //Check if a supplier exist in opening balance
+                    const checksupplier = await openingbalance.findOne({ username: username, accountnumber: supplieraccountno });
                     if(checksupplier !== null){
-                        if(checksupplier.supplier !== supplier){
-                            return { error: "supplieraccountnotaken" }; 
+                        if(checksupplier.name !== supplier){
+                            return { error: "supplieraccountnodoesmatch" }; 
                         }
+                    }else{
+                        return { error: "supplieraccountnodontexist" };
                     }
 
-                    //Check if a customer account no is taken and should not be given to someone else
-                    const checkcustomer = await buyandsell.findOne({ username: username, customeraccountno: customeraccountno });
+                    //Check if a customer exist in opening balance
+                    const checkcustomer = await openingbalance.findOne({ username: username, accountnumber: customeraccountno });
                     if(checkcustomer !== null){
-                        if(checkcustomer.customer !== customer){
-                            return { error: "customeraccountnotaken" }; 
+                        if(checkcustomer.name !== customer){
+                            return { error: "customeraccountnodoesmatch" }; 
                         }
+                    }else{
+                        return { error: "customeraccountnodontexist" };
                     }
 
                     const buyandsellcurrency = new buyandsell({ username, amount1, rate1, ngn1, supplier, supplieraccountno, customer, customeraccountno, rate2, ngn2, profit });
@@ -1524,6 +1501,7 @@ const resolvers = {
                     await buyandsellcurrency.save();
 
                     return { error: "no" };
+
                 } catch (e) {
                     return { error: "yes" };
                 }
@@ -1543,6 +1521,26 @@ const resolvers = {
                 try {
 
                     username = await UsersVerification(username);
+
+                    //Check if a supplier/customer exist in opening balance
+                    const check = await openingbalance.findOne({ username: username, accountnumber: accountnumber });
+                    if(check !== null){
+                        if(check.name !== fromorto){
+                            if(check.chooseclient === "supplier"){
+                                return { error: "supplieraccountnodoesmatch" }; 
+                            }  
+                            if(check.chooseclient === "customer"){
+                                return { error: "customeraccountnodoesmatch" }; 
+                            }
+                        }
+                    }else{
+                        if(chooseclient === "supplier"){
+                            return { error: "supplieraccountnodontexist" }; 
+                        }  
+                        if(chooseclient === "customer"){
+                            return { error: "customeraccountnodontexist" }; 
+                        }
+                    }
 
                     await recieveorpay.updateOne({ _id: id, username: username }, { $set: { amount, chooseclient, recievedorpay, fromorto, bankname, bankaccountnumber, bankaccountname, accountnumber } });
 
@@ -1591,11 +1589,32 @@ const resolvers = {
 
                     username = await UsersVerification(username);
 
+                    //Check if a supplier/customer exist in opening balance
+                    const check = await openingbalance.findOne({ username: username, accountnumber: accountnumber });
+                    if(check !== null){
+                        if(check.name !== fromorto){
+                            if(check.chooseclient === "supplier"){
+                                return { error: "supplieraccountnodoesmatch" }; 
+                            }  
+                            if(check.chooseclient === "customer"){
+                                return { error: "customeraccountnodoesmatch" }; 
+                            }
+                        }
+                    }else{
+                        if(chooseclient === "supplier"){
+                            return { error: "supplieraccountnodontexist" }; 
+                        }  
+                        if(chooseclient === "customer"){
+                            return { error: "customeraccountnodontexist" }; 
+                        }
+                    }
+
                     const recieveorpayenter = new recieveorpay({ username, amount, chooseclient, recievedorpay, fromorto, bankname, bankaccountnumber, bankaccountname, accountnumber });
 
                     await recieveorpayenter.save();
 
                     return { error: "no" };
+
                 } catch (e) {
                     return { error: "yes" };
                 }
@@ -1784,11 +1803,24 @@ const resolvers = {
 
                     username = await UsersVerification(username);
 
+                    //Check if a supplier or customer account no is taken and should not be given to someone else
+                    const check = await openingbalance.findOne({ username, accountnumber });
+                    if(check !== null){
+                        if(check.name !== name){
+                            if(check.chooseclient === "supplier"){
+                                return { error: "supplieraccountnotaken" }; 
+                            }else if(check.chooseclient === "customer"){
+                                return { error: "customeraccountnotaken" };
+                            }
+                        }
+                    }
+
                     const openingbalancer = new openingbalance({ username, amount, chooseclient, name, accountnumber });
 
                     await openingbalancer.save();
 
                     return { error: "no" };
+
                 } catch (e) {
                     return { error: "yes" };
                 }
@@ -1831,6 +1863,18 @@ const resolvers = {
                 try {
 
                     username = await UsersVerification(username);
+
+                    //Check if a supplier or customer account no is taken and should not be given to someone else
+                    const check = await openingbalance.findOne({ username, accountnumber });
+                    if(check !== null){
+                        if(check.name !== name){
+                            if(check.chooseclient === "supplier"){
+                                return { error: "supplieraccountnotaken" }; 
+                            }else if(check.chooseclient === "customer"){
+                                return { error: "customeraccountnotaken" };
+                            }
+                        }
+                    }
 
                     await openingbalance.updateOne({ _id: id, username: username }, { $set: { amount, chooseclient, name, accountnumber } });
 
@@ -1927,23 +1971,27 @@ const resolvers = {
             if (tokenverification) {
                 try {
 
+                    username = await UsersVerification(username);
+
                     let allexistingaccountnumber = [];
                     let newaccountnumber = 0;
 
-                    username = await UsersVerification(username);
-
-                    let gan = await buyandsell.find({ username });
+                    let gan = await openingbalance.find({ username });
 
                     await gan.forEach((e) => {
-                        allexistingaccountnumber.push(e.supplieraccountno);
-                        allexistingaccountnumber.push(e.customeraccountno);
+                        allexistingaccountnumber.push(e.accountnumber);
                     });
 
-                    for(let a = 0; a <= 100000; a++){
-                        newaccountnumber = Math.random().toString().slice(2,8);
-                        if(allexistingaccountnumber.includes(newaccountnumber.toString()) === false){
-                            break;
+                    for(let i of allexistingaccountnumber){
+                        if(parseFloat(i) > newaccountnumber){
+                            newaccountnumber = parseFloat(i);
                         }
+                    }
+
+                    newaccountnumber = newaccountnumber + 1;
+
+                    if(newaccountnumber === 1){
+                        newaccountnumber = 1000;
                     }
 
                     return { newaccountnumber: newaccountnumber };
