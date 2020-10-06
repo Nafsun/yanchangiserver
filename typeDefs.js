@@ -136,6 +136,7 @@ const typeDefs = gql`
         customeraccountno: String
         supplier: String
         supplieraccountno: String
+        balance: String
         date: String
         error: String
     }

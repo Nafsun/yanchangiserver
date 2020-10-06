@@ -572,11 +572,14 @@ const resolvers = {
                     let supplierpayercount = 0;
                     let customerpayercount = 0;
                     let expensecount = 0;
+                    let reconcilesendcount = 0;
+                    let reconcilerecievedcount = 0;
                     let total = 0;
 
                     const banker = await banks.find({ username: username });
                     const recieverorpayer = await recieveorpay.find({ username: username });
                     const expenses = await expense.find({ username });
+                    const reconciler = await reconcile.find({ username });
                     
                     await banker.forEach((e) => {
                         banklist.push({id: e._id, bankname: e.bankname, bankaccountnumber: e.bankaccountnumber, bankaccountname: e.bankaccountname, bankbalance: e.bankamount, date: e.date});
@@ -617,7 +620,20 @@ const resolvers = {
                             }
                         });
 
-                        total = parseFloat(banklist[count].bankbalance) + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - expensecount;
+                        reconciler.forEach((a) => {
+                            if(a.bankname === banklist[count].bankname &&
+                                a.bankaccountnumber === banklist[count].bankaccountnumber && a.from === "internal" && 
+                                a.sendorrecieved === "send"){
+                                    reconcilesendcount += parseFloat(a.amount);
+                            }
+                            if(a.bankname === banklist[count].bankname &&
+                                a.bankaccountnumber === banklist[count].bankaccountnumber && a.to === "internal" && 
+                                a.sendorrecieved === "recieved"){
+                                    reconcilerecievedcount += parseFloat(a.amount);
+                            }
+                        });
+
+                        total = parseFloat(banklist[count].bankbalance) + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - expensecount - reconcilesendcount + reconcilerecievedcount;
 
                         allbanks.push({...banklist[count], bankamount: total, bankbalance: banklist[count].bankbalance, date: e.date});
 
@@ -653,14 +669,47 @@ const resolvers = {
                     username = await UsersVerification(username);
                     
                     let all_bas = [];
+                    let amountpay = 0;
+                    let amountrecieved = 0;
+                    let ngn = 0;
+                    let totalbalance = 0;
+                    let totalopeningbalance = 0;
 
                     const bas = await openingbalance.find({ username: username, 'name': { $regex: searchcustomer, $options: "i" }, 'accountnumber': { $regex: searchcustomeraccountno, $options: "i" } }).hint({ $natural: -1 }).skip(start).limit(end);
 
-                    await bas.forEach((e) => {
+                    for await (let e of bas){
                         if(e.chooseclient === "customer"){
-                            all_bas.push({id: e._id, customer: e.name, customeraccountno: e.accountnumber});
+
+                            let tfc = await recieveorpay.find({ username, fromorto: e.name, accountnumber: e.accountnumber });
+                    
+                            let tfc2 = await buyandsell.find({ username, customer: e.name, customeraccountno: e.accountnumber });
+
+                            tfc.forEach((e) => {
+                                if(e.recievedorpay === "pay"){
+                                    amountpay += parseFloat(e.amount);
+                                }else if(e.recievedorpay === "recieved"){
+                                    amountrecieved += parseFloat(e.amount);
+                                }
+                            });
+
+                            tfc2.forEach((e) => {
+                                ngn += parseFloat(e.ngn2);
+                            });
+
+                            totalopeningbalance += parseFloat(e.amount);
+
+                            totalbalance = totalopeningbalance + ngn - amountrecieved + amountpay;
+
+                            all_bas.push({id: e._id, customer: e.name, customeraccountno: e.accountnumber, balance: totalbalance});
+                            
+                            amountpay = 0;
+                            amountrecieved = 0;
+                            ngn = 0;
+                            totalbalance = 0;
+                            totalopeningbalance = 0;
+
                         }
-                    });
+                    }
 
                     return all_bas;
 
@@ -685,14 +734,46 @@ const resolvers = {
                     username = await UsersVerification(username);
 
                     let all_gas = [];
+                    let amountpay = 0;
+                    let amountrecieved = 0;
+                    let ngn = 0;
+                    let totalbalance = 0;
+                    let totalopeningbalance = 0;
 
                     const gas = await openingbalance.find({ username: username, 'name': { $regex: searchsupplier, $options: "i" }, 'accountnumber': { $regex: searchsupplieraccountno, $options: "i" } }).hint({ $natural: -1 }).skip(start).limit(end);
 
-                    await gas.forEach((e) => {
+                    for await(let e of gas){
                         if(e.chooseclient === "supplier"){
-                            all_gas.push({id: e._id, supplier: e.name, supplieraccountno: e.accountnumber});
+
+                            let tfc = await recieveorpay.find({ username, fromorto: e.name, accountnumber: e.accountnumber });
+                    
+                            let tfc2 = await buyandsell.find({ username, supplier: e.name, supplieraccountno: e.accountnumber });
+
+                            tfc.forEach((e) => {
+                                if(e.recievedorpay === "pay"){
+                                    amountpay += parseFloat(e.amount);
+                                }else if(e.recievedorpay === "recieved"){
+                                    amountrecieved += parseFloat(e.amount);
+                                }
+                            });
+
+                            tfc2.forEach((e) => {
+                                ngn += parseFloat(e.ngn1);
+                            });
+
+                            totalopeningbalance += parseFloat(e.amount);
+
+                            totalbalance = totalopeningbalance + ngn - amountpay + amountrecieved;
+
+                            all_gas.push({id: e._id, supplier: e.name, supplieraccountno: e.accountnumber, balance: totalbalance});
+
+                            amountpay = 0;
+                            amountrecieved = 0;
+                            ngn = 0;
+                            totalbalance = 0;
+                            totalopeningbalance = 0;
                         }
-                    });
+                    }
 
                     return all_gas;
 
@@ -755,6 +836,7 @@ const resolvers = {
                     const fullrecieveorpay = await recieveorpay.find({ username });
                     const expenses = await expense.find({ username });
                     const openingbalances = await openingbalance.find({ username });
+                    const reconciler = await reconcile.find({ username });
 
                     //Total Balance
                     let supplierrecievercount = 0;
@@ -766,6 +848,8 @@ const resolvers = {
                     let totalexpense = 0;
                     let totalopeningbalancesupplier = 0;
                     let totalopeningbalancecustomer = 0;
+                    let reconcilesendcount = 0;
+                    let reconcilerecievedcount = 0;
 
                     await tbanks.forEach((e) => {
                         total += parseFloat(e.bankamount);
@@ -795,7 +879,16 @@ const resolvers = {
                         }
                     });
 
-                    totalbalance = total + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - totalexpense;
+                    await reconciler.forEach((a) => {
+                        if(a.from === "internal" && a.sendorrecieved === "send"){
+                            reconcilesendcount += parseFloat(a.amount);
+                        }
+                        if(a.to === "internal" && a.sendorrecieved === "recieved"){
+                            reconcilerecievedcount += parseFloat(a.amount);
+                        }
+                    });
+
+                    totalbalance = total + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - totalexpense - reconcilesendcount + reconcilerecievedcount;
 
                     //Total Debt - Supplier
                     let totaldebt = 0;
