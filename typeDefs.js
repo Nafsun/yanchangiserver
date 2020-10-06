@@ -35,6 +35,24 @@ const typeDefs = gql`
     
         totalopeningbalance(username: String, jwtauth: String): EXPENSES
         accessverify(username: String, jwtauth: String): LOGINOTHERUSERS
+
+        reconcileget(username: String, search: String, startc: Int, endc: Int, jwtauth: String): [RECONCILER]
+    }
+    type RECONCILER{
+        id: String
+        username: String
+        description: String
+        amount: String
+        sendorrecieved: String
+        from: String
+        bankname: String
+        bankaccountnumber: String
+        bankaccountname: String
+        to: String
+        bankname2: String
+        bankaccountnumber2: String
+        bankaccountname2: String
+        date: String
     }
     type EXPENSES{
         id: String
@@ -65,6 +83,9 @@ const typeDefs = gql`
         createopeningbalance: String 
         editopeningbalance: String 
         deleteopeningbalance: String
+        createreconcile: String 
+        editreconcile: String 
+        deletereconcile: String
         date: String
     }
     type TOTALITY{
@@ -243,9 +264,9 @@ const typeDefs = gql`
         addbanks(username: String, bankname: String, bankaccountnumber: String, bankaccountname: String, bankamount: String, jwtauth: String): Err
         bankupdate(id: String, username: String, bankname: String, bankaccountnumber: String, bankaccountname: String, bankamount: String, jwtauth: String): Err
         bankdelete(id: String, username: String, jwtauth: String): Err
-        addnewuser(username: String, newusername: String, newpassword: String, createbank: String, editbank: String, deletebank: String, createtransaction: String, edittransaction: String, deletetransaction: String, createrecieveorpay: String, editrecieveorpay: String, deleterecieveorpay: String, createexpense: String, editexpense: String, deleteexpense: String, createopeningbalance: String, editopeningbalance: String, deleteopeningbalance: String, jwtauth: String): Err
+        addnewuser(username: String, newusername: String, newpassword: String, createbank: String, editbank: String, deletebank: String, createtransaction: String, edittransaction: String, deletetransaction: String, createrecieveorpay: String, editrecieveorpay: String, deleterecieveorpay: String, createexpense: String, editexpense: String, deleteexpense: String, createopeningbalance: String, editopeningbalance: String, deleteopeningbalance: String, createreconcile: String, editreconcile: String, deletereconcile: String, jwtauth: String): Err
         existingusersdelete(id: String, username: String, jwtauth: String): Err
-        existingusersupdate(id: String, username: String, newusername: String, newpassword: String, createbank: String, editbank: String, deletebank: String, createtransaction: String, edittransaction: String, deletetransaction: String, createrecieveorpay: String, editrecieveorpay: String, deleterecieveorpay: String, createexpense: String, editexpense: String, deleteexpense: String, createopeningbalance: String, editopeningbalance: String, deleteopeningbalance: String, jwtauth: String): Err
+        existingusersupdate(id: String, username: String, newusername: String, newpassword: String, createbank: String, editbank: String, deletebank: String, createtransaction: String, edittransaction: String, deletetransaction: String, createrecieveorpay: String, editrecieveorpay: String, deleterecieveorpay: String, createexpense: String, editexpense: String, deleteexpense: String, createopeningbalance: String, editopeningbalance: String, deleteopeningbalance: String, createreconcile: String, editreconcile: String, deletereconcile: String, jwtauth: String): Err
 
         openingbalanceinsert(username: String, amount: String, chooseclient: String, name: String, accountnumber: String, jwtauth: String): Err
         openingbalanceupdate(id: String, username: String, amount: String, chooseclient: String, name: String, accountnumber: String, jwtauth: String): Err
@@ -256,6 +277,10 @@ const typeDefs = gql`
         expensesdelete(id: String, username: String, jwtauth: String): Err
 
         generateaccountnumber(username: String, jwtauth: String): Err
+
+        reconcileinsert(username: String, amount: String, description: String, sendorrecieved: String, from: String, bankname: String, bankaccountnumber: String, bankaccountname: String, to: String, bankname2: String, bankaccountnumber2: String, bankaccountname2: String, jwtauth: String): Err
+        reconcileupdate(id: String, username: String, amount: String, description: String, sendorrecieved: String, from: String, bankname: String, bankaccountnumber: String, bankaccountname: String, to: String, bankname2: String, bankaccountnumber2: String, bankaccountname2: String, jwtauth: String): Err
+        reconciledelete(id: String, username: String, jwtauth: String): Err
     }
 `;
 

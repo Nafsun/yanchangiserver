@@ -12,6 +12,7 @@ const recieveorpay = require("./models/recieveorpay");
 const banks = require("./models/banks");
 const expense = require("./models/expense");
 const openingbalance = require("./models/openingbalance");
+const reconcile = require("./models/reconcile")
 
 function sortByKey(array, key) {
     return array.sort(function(a, b) {
@@ -1044,6 +1045,30 @@ const resolvers = {
             }
         },
 
+        reconcileget: async (_, { username, search, startc, endc, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    const r = await reconcile.find({ username: username, 'description': { $regex: search, $options: "i" } }).hint({ $natural: -1 }).skip(startc).limit(endc);
+
+                    return r;
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
     },
     Mutation: { //adding
 
@@ -1692,7 +1717,7 @@ const resolvers = {
             }
         },
 
-        addnewuser: async (_, { username, newusername, newpassword, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, jwtauth }) => {
+        addnewuser: async (_, { username, newusername, newpassword, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile, jwtauth }) => {
             const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
 
             if (tokenverification.username !== username) {
@@ -1710,7 +1735,7 @@ const resolvers = {
 
                         const hashedPassword = await argon2.hash(newpassword + newusername + process.env.PasswordToken);
                         
-                        const adduser = new login({ username: newusername, password: hashedPassword, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance });
+                        const adduser = new login({ username: newusername, password: hashedPassword, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile });
                         await adduser.save();
 
                     } else {
@@ -1749,7 +1774,7 @@ const resolvers = {
             }
         },
 
-        existingusersupdate: async (_, { id, username, newusername, newpassword, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, jwtauth }) => {
+        existingusersupdate: async (_, { id, username, newusername, newpassword, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile, jwtauth }) => {
             const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
 
             if (tokenverification.username !== username) {
@@ -1763,7 +1788,7 @@ const resolvers = {
 
                     if (newpassword === "") {
                         
-                        await login.updateOne({_id: id, createdby: username }, {$set: { username: newusername, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance }});
+                        await login.updateOne({_id: id, createdby: username }, {$set: { username: newusername, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile }});
 
                         return { error: "no" };
 
@@ -1771,7 +1796,7 @@ const resolvers = {
 
                         const hashedPassword = await argon2.hash(newpassword + newusername + process.env.PasswordToken);
                         
-                        await login.updateOne({_id: id, createdby: username }, {$set: { username: newusername, password: hashedPassword, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance }});
+                        await login.updateOne({_id: id, createdby: username }, {$set: { username: newusername, password: hashedPassword, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile }});
 
                         return { error: "passwordchange" };
                     }                    
@@ -1988,6 +2013,80 @@ const resolvers = {
                     }
 
                     return { newaccountnumber: newaccountnumber };
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        reconcileinsert: async (_, { username, amount, description, sendorrecieved, from, bankname, bankaccountnumber, bankaccountname, to, bankname2, bankaccountnumber2, bankaccountname2, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    const reconciler = new reconcile({ username, amount, description, sendorrecieved, from, bankname, bankaccountnumber, bankaccountname, to, bankname2, bankaccountnumber2, bankaccountname2 });
+
+                    await reconciler.save();
+
+                    return { error: "no" };
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        reconcileupdate: async (_, { id, username, amount, description, sendorrecieved, from, bankname, bankaccountnumber, bankaccountname, to, bankname2, bankaccountnumber2, bankaccountname2, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    await reconcile.updateOne({_id: id, username: username}, { amount, description, sendorrecieved, from, bankname, bankaccountnumber, bankaccountname, to, bankname2, bankaccountnumber2, bankaccountname2 });
+
+                    return { error: "no" };
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        reconciledelete: async (_, { id, username, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    await reconcile.deleteOne({_id: id, username: username});
+
+                    return { error: "no" };
 
                 } catch (e) {
                     return { error: "yes" };

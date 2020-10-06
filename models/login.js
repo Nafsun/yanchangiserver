@@ -22,6 +22,9 @@ let login = mongoose.model("login",
         createopeningbalance: { type: String, default: "yes" },
         editopeningbalance: { type: String, default: "yes" },
         deleteopeningbalance: { type: String, default: "yes" },
+        createreconcile: { type: String, default: "yes" },
+        editreconcile: { type: String, default: "yes" },
+        deletereconcile: { type: String, default: "yes" },
 
         date: {type:String, default: () => moment().utcOffset(1).format('LLLL')}
 
