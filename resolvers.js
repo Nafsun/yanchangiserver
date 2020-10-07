@@ -626,8 +626,18 @@ const resolvers = {
                                 a.sendorrecieved === "send"){
                                     reconcilesendcount += parseFloat(a.amount);
                             }
-                            if(a.bankname === banklist[count].bankname &&
-                                a.bankaccountnumber === banklist[count].bankaccountnumber && a.to === "internal" && 
+                            if(a.bankname === banklist[count].bankname &&  
+                                a.bankaccountnumber === banklist[count].bankaccountnumber && a.from === "internal" && 
+                                a.sendorrecieved === "recieved"){
+                                    reconcilesendcount += parseFloat(a.amount);
+                            }
+                            if(a.bankname2 === banklist[count].bankname &&
+                                a.bankaccountnumber2 === banklist[count].bankaccountnumber && a.to === "internal" && 
+                                a.sendorrecieved === "send"){
+                                    reconcilerecievedcount += parseFloat(a.amount);
+                            }
+                            if(a.bankname2 === banklist[count].bankname &&  
+                                a.bankaccountnumber2 === banklist[count].bankaccountnumber && a.to === "internal" && 
                                 a.sendorrecieved === "recieved"){
                                     reconcilerecievedcount += parseFloat(a.amount);
                             }
@@ -643,6 +653,8 @@ const resolvers = {
                         customerpayercount = 0;
                         expensecount = 0;
                         total = 0;
+                        reconcilesendcount = 0;
+                        reconcilerecievedcount = 0;
                         count += 1;
                     });
 
@@ -882,6 +894,12 @@ const resolvers = {
                     await reconciler.forEach((a) => {
                         if(a.from === "internal" && a.sendorrecieved === "send"){
                             reconcilesendcount += parseFloat(a.amount);
+                        }
+                        if(a.from === "internal" && a.sendorrecieved === "recieved"){
+                            reconcilesendcount += parseFloat(a.amount);
+                        }
+                        if(a.to === "internal" && a.sendorrecieved === "send"){
+                            reconcilerecievedcount += parseFloat(a.amount);
                         }
                         if(a.to === "internal" && a.sendorrecieved === "recieved"){
                             reconcilerecievedcount += parseFloat(a.amount);
