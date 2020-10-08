@@ -1828,7 +1828,7 @@ const resolvers = {
             }
         },
 
-        addnewuser: async (_, { username, newusername, newpassword, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile, jwtauth }) => {
+        addnewuser: async (_, { username, newusername, newpassword, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile, listofcustomers, listofsuppliers, jwtauth }) => {
             const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
 
             if (tokenverification.username !== username) {
@@ -1846,7 +1846,7 @@ const resolvers = {
 
                         const hashedPassword = await argon2.hash(newpassword + newusername + process.env.PasswordToken);
                         
-                        const adduser = new login({ username: newusername, password: hashedPassword, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile });
+                        const adduser = new login({ username: newusername, password: hashedPassword, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile, listofcustomers, listofsuppliers });
                         await adduser.save();
 
                     } else {
@@ -1885,7 +1885,7 @@ const resolvers = {
             }
         },
 
-        existingusersupdate: async (_, { id, username, newusername, newpassword, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile, jwtauth }) => {
+        existingusersupdate: async (_, { id, username, newusername, newpassword, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile, listofcustomers, listofsuppliers, jwtauth }) => {
             const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
 
             if (tokenverification.username !== username) {
@@ -1899,7 +1899,7 @@ const resolvers = {
 
                     if (newpassword === "") {
                         
-                        await login.updateOne({_id: id, createdby: username }, {$set: { username: newusername, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile }});
+                        await login.updateOne({_id: id, createdby: username }, {$set: { username: newusername, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile, listofcustomers, listofsuppliers }});
 
                         return { error: "no" };
 
@@ -1907,7 +1907,7 @@ const resolvers = {
 
                         const hashedPassword = await argon2.hash(newpassword + newusername + process.env.PasswordToken);
                         
-                        await login.updateOne({_id: id, createdby: username }, {$set: { username: newusername, password: hashedPassword, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile }});
+                        await login.updateOne({_id: id, createdby: username }, {$set: { username: newusername, password: hashedPassword, createdby: username, createbank, editbank, deletebank, createtransaction, edittransaction, deletetransaction, createrecieveorpay, editrecieveorpay, deleterecieveorpay, createexpense, editexpense, deleteexpense, createopeningbalance, editopeningbalance, deleteopeningbalance, createreconcile, editreconcile, deletereconcile, listofcustomers, listofsuppliers }});
 
                         return { error: "passwordchange" };
                     }                    

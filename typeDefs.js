@@ -86,6 +86,8 @@ const typeDefs = gql`
         createreconcile: String 
         editreconcile: String 
         deletereconcile: String
+        listofcustomers: String 
+        listofsuppliers: String
         date: String
     }
     type TOTALITY{
@@ -265,9 +267,9 @@ const typeDefs = gql`
         addbanks(username: String, bankname: String, bankaccountnumber: String, bankaccountname: String, bankamount: String, jwtauth: String): Err
         bankupdate(id: String, username: String, bankname: String, bankaccountnumber: String, bankaccountname: String, bankamount: String, jwtauth: String): Err
         bankdelete(id: String, username: String, jwtauth: String): Err
-        addnewuser(username: String, newusername: String, newpassword: String, createbank: String, editbank: String, deletebank: String, createtransaction: String, edittransaction: String, deletetransaction: String, createrecieveorpay: String, editrecieveorpay: String, deleterecieveorpay: String, createexpense: String, editexpense: String, deleteexpense: String, createopeningbalance: String, editopeningbalance: String, deleteopeningbalance: String, createreconcile: String, editreconcile: String, deletereconcile: String, jwtauth: String): Err
+        addnewuser(username: String, newusername: String, newpassword: String, createbank: String, editbank: String, deletebank: String, createtransaction: String, edittransaction: String, deletetransaction: String, createrecieveorpay: String, editrecieveorpay: String, deleterecieveorpay: String, createexpense: String, editexpense: String, deleteexpense: String, createopeningbalance: String, editopeningbalance: String, deleteopeningbalance: String, createreconcile: String, editreconcile: String, deletereconcile: String, listofcustomers: String, listofsuppliers: String, jwtauth: String): Err
         existingusersdelete(id: String, username: String, jwtauth: String): Err
-        existingusersupdate(id: String, username: String, newusername: String, newpassword: String, createbank: String, editbank: String, deletebank: String, createtransaction: String, edittransaction: String, deletetransaction: String, createrecieveorpay: String, editrecieveorpay: String, deleterecieveorpay: String, createexpense: String, editexpense: String, deleteexpense: String, createopeningbalance: String, editopeningbalance: String, deleteopeningbalance: String, createreconcile: String, editreconcile: String, deletereconcile: String, jwtauth: String): Err
+        existingusersupdate(id: String, username: String, newusername: String, newpassword: String, createbank: String, editbank: String, deletebank: String, createtransaction: String, edittransaction: String, deletetransaction: String, createrecieveorpay: String, editrecieveorpay: String, deleterecieveorpay: String, createexpense: String, editexpense: String, deleteexpense: String, createopeningbalance: String, editopeningbalance: String, deleteopeningbalance: String, createreconcile: String, editreconcile: String, deletereconcile: String, listofcustomers: String, listofsuppliers: String, jwtauth: String): Err
 
         openingbalanceinsert(username: String, amount: String, chooseclient: String, name: String, accountnumber: String, jwtauth: String): Err
         openingbalanceupdate(id: String, username: String, amount: String, chooseclient: String, name: String, accountnumber: String, jwtauth: String): Err
