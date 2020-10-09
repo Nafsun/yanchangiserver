@@ -1180,6 +1180,154 @@ const resolvers = {
             }
         },
 
+        totalsinglebankbalance: async (_, { username, bankname, bankaccountnumber, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    let supplierrecievercount = 0;
+                    let customerrecievercount = 0;
+                    let supplierpayercount = 0;
+                    let customerpayercount = 0;
+                    let expensecount = 0;
+                    let reconcilesendcount = 0;
+                    let reconcilerecievedcount = 0;
+                    let total = 0;
+
+                    const banker = await banks.findOne({ username, bankname, bankaccountnumber });
+                    const recieverorpayer = await recieveorpay.find({ username, bankname, bankaccountnumber });
+                    const expenses = await expense.find({ username, bankname, bankaccountnumber });
+                    const reconciler = await reconcile.find({ username, bankname, bankaccountnumber });
+
+                    recieverorpayer.forEach((a) => {
+                        if(a.bankname === bankname &&
+                            a.bankaccountnumber === bankaccountnumber &&
+                            a.chooseclient === "supplier" && a.recievedorpay === "recieved"){
+                                supplierrecievercount += parseFloat(a.amount);
+                        }else if(a.bankname === bankname &&
+                            a.bankaccountnumber === bankaccountnumber &&
+                            a.chooseclient === "customer" && a.recievedorpay === "recieved"){
+                                customerrecievercount += parseFloat(a.amount);
+                        }else if(a.bankname === bankname &&
+                            a.bankaccountnumber === bankaccountnumber &&
+                            a.chooseclient === "supplier" && a.recievedorpay === "pay"){
+                                supplierpayercount += parseFloat(a.amount);
+                        }else if(a.bankname === bankname &&
+                            a.bankaccountnumber === bankaccountnumber && 
+                            a.chooseclient === "customer" && a.recievedorpay === "pay"){
+                                customerpayercount += parseFloat(a.amount);
+                        }
+                    });
+
+                    expenses.forEach((a) => {
+                        if(a.bankname === bankname &&
+                            a.bankaccountnumber === bankaccountnumber){
+                                expensecount += parseFloat(a.amount);
+                        }
+                    });
+
+                    reconciler.forEach((a) => {
+                        if(a.bankname === bankname &&
+                            a.bankaccountnumber === bankaccountnumber && a.from === "internal" && 
+                            a.sendorrecieved === "send"){
+                                reconcilesendcount += parseFloat(a.amount);
+                        }
+                        if(a.bankname === bankname &&  
+                            a.bankaccountnumber === bankaccountnumber && a.from === "internal" && 
+                            a.sendorrecieved === "recieved"){
+                                reconcilesendcount += parseFloat(a.amount);
+                        }
+                        if(a.bankname2 === bankname &&
+                            a.bankaccountnumber2 === bankaccountnumber && a.to === "internal" && 
+                            a.sendorrecieved === "send"){
+                                reconcilerecievedcount += parseFloat(a.amount);
+                        }
+                        if(a.bankname2 === bankname &&  
+                            a.bankaccountnumber2 === bankaccountnumber && a.to === "internal" && 
+                            a.sendorrecieved === "recieved"){
+                                reconcilerecievedcount += parseFloat(a.amount);
+                        }
+                    });
+
+                    total = parseFloat(banker.bankamount) + supplierrecievercount + customerrecievercount - supplierpayercount - customerpayercount - expensecount - reconcilesendcount + reconcilerecievedcount;
+
+                    return {totalbalance: total};
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        totalityforpayorrecievedsinglebank: async (_, { username, bankname, bankaccountnumber, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    let amountpay = 0;
+                    let amountrecieved = 0;
+
+                    const tfc = await recieveorpay.find({ username, bankname, bankaccountnumber });
+
+                    await tfc.forEach((e) => {
+                        if(e.recievedorpay === "pay"){
+                            amountpay += parseFloat(e.amount);
+                        }
+                        if(e.recievedorpay === "recieved"){
+                            amountrecieved += parseFloat(e.amount);
+                        }
+                    });
+
+                    return {amountpay: amountpay, amountrecieved: amountrecieved};
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        recieveorpaygetsinglebank: async (_, { username, bankname, bankaccountnumber, startc, endc, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    const rop = await recieveorpay.find({ username, bankname, bankaccountnumber }).hint({ $natural: -1 }).skip(startc).limit(endc);
+
+                    return rop;
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
     },
     Mutation: { //adding
 

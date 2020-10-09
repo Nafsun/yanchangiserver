@@ -37,6 +37,9 @@ const typeDefs = gql`
         accessverify(username: String, jwtauth: String): LOGINOTHERUSERS
 
         reconcileget(username: String, search: String, startc: Int, endc: Int, jwtauth: String): [RECONCILER]
+        totalsinglebankbalance(username: String, bankname: String, bankaccountnumber: String, jwtauth: String): TOTALCUSTOMERANDSUPPLIER
+        totalityforpayorrecievedsinglebank(username: String, bankname: String, bankaccountnumber: String, jwtauth: String): TOTALITY
+        recieveorpaygetsinglebank(username: String, bankname: String, bankaccountnumber: String, startc: Int, endc: Int, jwtauth: String): [RECIEVEDCUSTOMERANDSUPPLIER]
     }
     type RECONCILER{
         id: String
@@ -111,6 +114,7 @@ const typeDefs = gql`
     }
     type TOTALCUSTOMERANDSUPPLIER{
         totalbalance: String
+        error: String
     }
     type RECIEVEDCUSTOMERANDSUPPLIER{
         id: String
