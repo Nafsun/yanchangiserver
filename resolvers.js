@@ -591,22 +591,18 @@ const resolvers = {
                         recieverorpayer.forEach((a) => {
                             if(a.bankname === banklist[count].bankname &&
                                 a.bankaccountnumber === banklist[count].bankaccountnumber &&
-                                a.bankaccountname === banklist[count].bankaccountname && 
                                 a.chooseclient === "supplier" && a.recievedorpay === "recieved"){
                                     supplierrecievercount += parseFloat(a.amount);
                             }else if(a.bankname === banklist[count].bankname &&
                                 a.bankaccountnumber === banklist[count].bankaccountnumber &&
-                                a.bankaccountname === banklist[count].bankaccountname && 
                                 a.chooseclient === "customer" && a.recievedorpay === "recieved"){
                                     customerrecievercount += parseFloat(a.amount);
                             }else if(a.bankname === banklist[count].bankname &&
                                 a.bankaccountnumber === banklist[count].bankaccountnumber &&
-                                a.bankaccountname === banklist[count].bankaccountname && 
                                 a.chooseclient === "supplier" && a.recievedorpay === "pay"){
                                     supplierpayercount += parseFloat(a.amount);
                             }else if(a.bankname === banklist[count].bankname &&
                                 a.bankaccountnumber === banklist[count].bankaccountnumber &&
-                                a.bankaccountname === banklist[count].bankaccountname && 
                                 a.chooseclient === "customer" && a.recievedorpay === "pay"){
                                     customerpayercount += parseFloat(a.amount);
                             }
@@ -614,8 +610,7 @@ const resolvers = {
 
                         expenses.forEach((a) => {
                             if(a.bankname === banklist[count].bankname &&
-                                a.bankaccountnumber === banklist[count].bankaccountnumber &&
-                                a.bankaccountname === banklist[count].bankaccountname){
+                                a.bankaccountnumber === banklist[count].bankaccountnumber){
                                     expensecount += parseFloat(a.amount);
                             }
                         });
@@ -1204,36 +1199,25 @@ const resolvers = {
                     const banker = await banks.findOne({ username, bankname, bankaccountnumber });
                     const recieverorpayer = await recieveorpay.find({ username, bankname, bankaccountnumber });
                     const expenses = await expense.find({ username, bankname, bankaccountnumber });
-                    const reconciler = await reconcile.find({ username, bankname, bankaccountnumber });
+                    const reconciler = await reconcile.find({ username });
 
-                    recieverorpayer.forEach((a) => {
-                        if(a.bankname === bankname &&
-                            a.bankaccountnumber === bankaccountnumber &&
-                            a.chooseclient === "supplier" && a.recievedorpay === "recieved"){
+                    await recieverorpayer.forEach((a) => {
+                        if(a.chooseclient === "supplier" && a.recievedorpay === "recieved"){
                                 supplierrecievercount += parseFloat(a.amount);
-                        }else if(a.bankname === bankname &&
-                            a.bankaccountnumber === bankaccountnumber &&
-                            a.chooseclient === "customer" && a.recievedorpay === "recieved"){
+                        }else if(a.chooseclient === "customer" && a.recievedorpay === "recieved"){
                                 customerrecievercount += parseFloat(a.amount);
-                        }else if(a.bankname === bankname &&
-                            a.bankaccountnumber === bankaccountnumber &&
-                            a.chooseclient === "supplier" && a.recievedorpay === "pay"){
+                        }else if(a.chooseclient === "supplier" && a.recievedorpay === "pay"){
                                 supplierpayercount += parseFloat(a.amount);
-                        }else if(a.bankname === bankname &&
-                            a.bankaccountnumber === bankaccountnumber && 
-                            a.chooseclient === "customer" && a.recievedorpay === "pay"){
+                        }else if(a.chooseclient === "customer" && a.recievedorpay === "pay"){
                                 customerpayercount += parseFloat(a.amount);
                         }
                     });
 
-                    expenses.forEach((a) => {
-                        if(a.bankname === bankname &&
-                            a.bankaccountnumber === bankaccountnumber){
-                                expensecount += parseFloat(a.amount);
-                        }
+                    await expenses.forEach((a) => {
+                        expensecount += parseFloat(a.amount);
                     });
 
-                    reconciler.forEach((a) => {
+                    await reconciler.forEach((a) => {
                         if(a.bankname === bankname &&
                             a.bankaccountnumber === bankaccountnumber && a.from === "internal" && 
                             a.sendorrecieved === "send"){
@@ -1280,21 +1264,34 @@ const resolvers = {
 
                     username = await UsersVerification(username);
 
-                    let amountpay = 0;
-                    let amountrecieved = 0;
+                    let supplierrecievercount = 0;
+                    let customerrecievercount = 0;
+                    let totalrecievercount = 0;
+                    let supplierpayercount = 0;
+                    let customerpayercount = 0;
+                    let totalpayercount = 0; 
 
                     const tfc = await recieveorpay.find({ username, bankname, bankaccountnumber });
 
-                    await tfc.forEach((e) => {
-                        if(e.recievedorpay === "pay"){
-                            amountpay += parseFloat(e.amount);
-                        }
-                        if(e.recievedorpay === "recieved"){
-                            amountrecieved += parseFloat(e.amount);
+                    await tfc.forEach((a) => {
+                        if(a.chooseclient === "supplier" && a.recievedorpay === "recieved"){
+                                supplierrecievercount += parseFloat(a.amount);
+                        }else if(a.chooseclient === "customer" && a.recievedorpay === "recieved"){
+                                customerrecievercount += parseFloat(a.amount);
+                        }else if(a.chooseclient === "supplier" && a.recievedorpay === "pay"){
+                                supplierpayercount += parseFloat(a.amount);
+                        }else if(a.chooseclient === "customer" && a.recievedorpay === "pay"){
+                                customerpayercount += parseFloat(a.amount);
                         }
                     });
 
-                    return {amountpay: amountpay, amountrecieved: amountrecieved};
+                    totalrecievercount = supplierrecievercount + customerrecievercount;
+                    totalpayercount = supplierpayercount + customerpayercount;
+
+                    //totalrecievercount = Math.abs(totalrecievercount); //return the value even if it is negative or positive
+                    //totalpayercount = Math.abs(totalpayercount);
+
+                    return {amountpay: totalpayercount, amountrecieved: totalrecievercount};
 
                 } catch (e) {
                     return { error: "yes" };
