@@ -1045,6 +1045,28 @@ const resolvers = {
 
         },
 
+        expensesgetsinglebank: async (_, { username, bankname, bankaccountnumber, startc, endc, jwtauth }) => {
+
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+
+                username = await UsersVerification(username);
+                
+                const e = await expense.find({ username, bankname, bankaccountnumber }).hint({ $natural: -1 }).skip(startc).limit(endc);
+
+                return e;
+
+            } else {
+                return { error: "verifyerror" };
+            }
+
+        },
+
         totalexpenses: async (_, { username, jwtauth }) => {
             const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
 
@@ -1060,6 +1082,36 @@ const resolvers = {
                     let total = 0;
 
                     const e = await expense.find({ username });
+
+                    await e.forEach((a) => {
+                        total += parseFloat(a.amount);
+                    })
+
+                    return {totalamount: total};
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        totalexpensessinglebank: async (_, { username, bankname, bankaccountnumber, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    let total = 0;
+
+                    const e = await expense.find({ username, bankname, bankaccountnumber });
 
                     await e.forEach((a) => {
                         total += parseFloat(a.amount);

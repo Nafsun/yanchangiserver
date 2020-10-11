@@ -29,7 +29,9 @@ const typeDefs = gql`
         getallavailablebanks(username: String, jwtauth: String): [ALLBANKS]
 
         expensesget(username: String, search: String, startc: Int, endc: Int, jwtauth: String): [EXPENSES]
+        expensesgetsinglebank(username: String, bankname: String, bankaccountnumber: String, startc: Int, endc: Int, jwtauth: String): [EXPENSES]
         totalexpenses(username: String, jwtauth: String): EXPENSES
+        totalexpensessinglebank(username: String, bankname: String, bankaccountnumber: String, jwtauth: String): EXPENSES
 
         openingbalanceget(username: String, search: String, startc: Int, endc: Int, jwtauth: String): [RECIEVEDCUSTOMERANDSUPPLIER]
     
