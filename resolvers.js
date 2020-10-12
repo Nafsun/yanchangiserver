@@ -1227,6 +1227,30 @@ const resolvers = {
             }
         },
 
+        reconcilegetsinglebank: async (_, { username, bankname, bankaccountnumber, startc, endc, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    const r = await reconcile.find({ $or:[{username, from: "internal", bankname, bankaccountnumber}, {username, to: "internal", bankname2: bankname, bankaccountnumber2: bankaccountnumber}] }).hint({ $natural: -1 }).skip(startc).limit(endc);
+
+                    return r;
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
         totalsinglebankbalance: async (_, { username, bankname, bankaccountnumber, jwtauth }) => {
             const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
 
