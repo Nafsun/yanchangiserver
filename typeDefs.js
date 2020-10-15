@@ -295,6 +295,10 @@ const typeDefs = gql`
         allfilteredexpenses(username: String, fromdate: String, todate: String, bankname: String, bankaccountnumber: String, jwtauth: String): [EXPENSES]
         allfilteredrecievedorpay(username: String, fromdate: String, todate: String, bankname: String, bankaccountnumber: String, jwtauth: String): [RECIEVEDCUSTOMERANDSUPPLIER]
         allfilteredreconcile(username: String, fromdate: String, todate: String, bankname: String, bankaccountnumber: String, jwtauth: String): [RECONCILER]
+        allfilteredbuyandsellcustomer(username: String, fromdate: String, todate: String, customer: String, customeraccountno: String, jwtauth: String): [BUYANDSELL]
+        allfilteredbuyandsellsupplier(username: String, fromdate: String, todate: String, supplier: String, supplieraccountno: String, jwtauth: String): [BUYANDSELL]
+        allfilteredrecieveorpaycustomer(username: String, fromdate: String, todate: String, customer: String, customeraccountno: String, jwtauth: String): [RECIEVEDCUSTOMERANDSUPPLIER]
+        allfilteredrecieveorpaysupplier(username: String, fromdate: String, todate: String, supplier: String, supplieraccountno: String, jwtauth: String): [RECIEVEDCUSTOMERANDSUPPLIER]
     }
 `;
 

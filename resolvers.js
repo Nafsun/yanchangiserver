@@ -2500,6 +2500,102 @@ const resolvers = {
             }
         },
 
+        allfilteredbuyandsellcustomer: async (_, { username, fromdate, todate, customer, customeraccountno, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    const bas = await buyandsell.find({ username, customer, customeraccountno, "createdAt": { $gte: fromdate, $lt: todate } });
+
+                    return bas;
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        allfilteredbuyandsellsupplier: async (_, { username, fromdate, todate, supplier, supplieraccountno, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    const bas = await buyandsell.find({ username, supplier, supplieraccountno, "createdAt": { $gte: fromdate, $lt: todate } });
+
+                    return bas;
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        allfilteredrecieveorpaycustomer: async (_, { username, fromdate, todate, customer, customeraccountno, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    const rop = await recieveorpay.find({ username, fromorto: customer, accountnumber: customeraccountno, "createdAt": { $gte: fromdate, $lt: todate } });
+
+                    return rop;
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        allfilteredrecieveorpaysupplier: async (_, { username, fromdate, todate, supplier, supplieraccountno, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    const rop = await recieveorpay.find({ username, fromorto: supplier, accountnumber: supplieraccountno, "createdAt": { $gte: fromdate, $lt: todate } });
+
+                    return rop;
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
     }
 }
 
