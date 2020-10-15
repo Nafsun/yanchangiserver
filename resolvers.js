@@ -2428,6 +2428,78 @@ const resolvers = {
             }
         },
 
+        allfilteredexpenses: async (_, { username, fromdate, todate, bankname, bankaccountnumber, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    let filtere = await expense.find({username, bankname, bankaccountnumber, "createdAt": { $gte: fromdate, $lt: todate }});
+
+                    return filtere;
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        allfilteredrecievedorpay: async (_, { username, fromdate, todate, bankname, bankaccountnumber, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    let filterr = await recieveorpay.find({username, bankname, bankaccountnumber, "createdAt": { $gte: fromdate, $lt: todate }});
+
+                    return filterr;
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
+        allfilteredreconcile: async (_, { username, fromdate, todate, bankname, bankaccountnumber, jwtauth }) => {
+            const tokenverification = await verify(jwtauth, process.env.Verify); //verifying the token
+
+            if (tokenverification.username !== username) {
+                return { error: "changetoken" };
+            }
+
+            if (tokenverification) {
+                try {
+
+                    username = await UsersVerification(username);
+
+                    let filterr = await reconcile.find({$or:[{username, from: "internal", bankname, bankaccountnumber, "createdAt": { $gte: fromdate, $lt: todate }}, {username, to: "internal", bankname2: bankname, bankaccountnumber2: bankaccountnumber, "createdAt": { $gte: fromdate, $lt: todate }}]});
+
+                    return filterr;
+
+                } catch (e) {
+                    return { error: "yes" };
+                }
+            } else {
+                return { error: "errortoken" };
+            }
+        },
+
     }
 }
 

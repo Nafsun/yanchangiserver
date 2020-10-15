@@ -291,6 +291,10 @@ const typeDefs = gql`
         reconcileinsert(username: String, amount: String, description: String, sendorrecieved: String, from: String, bankname: String, bankaccountnumber: String, bankaccountname: String, to: String, bankname2: String, bankaccountnumber2: String, bankaccountname2: String, jwtauth: String): Err
         reconcileupdate(id: String, username: String, amount: String, description: String, sendorrecieved: String, from: String, bankname: String, bankaccountnumber: String, bankaccountname: String, to: String, bankname2: String, bankaccountnumber2: String, bankaccountname2: String, jwtauth: String): Err
         reconciledelete(id: String, username: String, jwtauth: String): Err
+
+        allfilteredexpenses(username: String, fromdate: String, todate: String, bankname: String, bankaccountnumber: String, jwtauth: String): [EXPENSES]
+        allfilteredrecievedorpay(username: String, fromdate: String, todate: String, bankname: String, bankaccountnumber: String, jwtauth: String): [RECIEVEDCUSTOMERANDSUPPLIER]
+        allfilteredreconcile(username: String, fromdate: String, todate: String, bankname: String, bankaccountnumber: String, jwtauth: String): [RECONCILER]
     }
 `;
 
